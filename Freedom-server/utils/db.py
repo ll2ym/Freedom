@@ -1,12 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from utils.config import settings
+from utils.config import DB_URL
 
 # Create SQLAlchemy engine
 engine = create_engine(
-    settings.database_url,
-    connect_args={"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
+    DB_URL,
+    connect_args={"check_same_thread": False} if DB_URL.startswith("sqlite") else {}
 )
 
 # Create a configured "Session" class
@@ -22,3 +22,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# Create all tables
+def create_tables():
+    Base.metadata.create_all(bind=engine)

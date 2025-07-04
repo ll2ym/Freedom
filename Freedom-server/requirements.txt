@@ -1,28 +1,12 @@
-fastapi
-uvicorn
-sqlalchemy
-pydantic
-python-jose
-passlib[bcrypt]
-websockets
-cryptography
-python-dotenv
-pytest
-
-fastapi, uvicorn: for building and serving the API
-
-sqlalchemy: for database ORM
-
-pydantic: for request/response validation
-
-python-jose: JWT signing and verification
-
-passlib[bcrypt]: secure password hashing
-
-websockets: WebSocket support for real-time messaging and calls
-
-cryptography: encryption utilities (AES, etc.)
-
-python-dotenv: loading .env for secrets/config
-
-pytest: unit testing
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+sqlalchemy==2.0.23
+pydantic==2.5.0
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+websockets==12.0
+cryptography==41.0.7
+python-dotenv==1.0.0
+pytest==7.4.3
+slowapi==0.1.9
+python-multipart==0.0.6
