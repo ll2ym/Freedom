@@ -1,0 +1,28 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+python-jose
+passlib[bcrypt]
+websockets
+cryptography
+python-dotenv
+pytest
+
+fastapi, uvicorn: for building and serving the API
+
+sqlalchemy: for database ORM
+
+pydantic: for request/response validation
+
+python-jose: JWT signing and verification
+
+passlib[bcrypt]: secure password hashing
+
+websockets: WebSocket support for real-time messaging and calls
+
+cryptography: encryption utilities (AES, etc.)
+
+python-dotenv: loading .env for secrets/config
+
+pytest: unit testing

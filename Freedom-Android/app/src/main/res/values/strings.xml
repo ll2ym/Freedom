@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- App name and identity -->
+    <string name="app_name">Freedom</string>
+    <string name="app_slogan">It is human right for secure communications!</string>
+
+    <!-- Authentication -->
+    <string name="login">Log In</string>
+    <string name="register">Register</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="enter_username">Enter your username</string>
+    <string name="enter_password">Enter your password</string>
+    <string name="enter_invite_code">Enter your invite code</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="dont_have_account">Don't have an account?</string>
+    <string name="logout">Logout</string>
+
+    <!-- Chat -->
+    <string name="new_message_hint">Type a message...</string>
+    <string name="send">Send</string>
+    <string name="you">You</string>
+    <string name="message_encrypted">This message is encrypted</string>
+    <string name="chat_encryption_notice">All chats are end-to-end encrypted</string>
+
+    <!-- Group -->
+    <string name="create_group">Create Group</string>
+    <string name="group_name">Group Name</string>
+    <string name="add_members">Add Members</string>
+    <string name="group_created_success">Group created successfully</string>
+    <string name="group_member_limit_reached">Group member limit reached (40 max)</string>
+
+    <!-- Calls -->
+    <string name="start_call">Start Call</string>
+    <string name="incoming_call">Incoming Call</string>
+    <string name="accept">Accept</string>
+    <string name="decline">Decline</string>
+    <string name="call_ended">Call Ended</string>
+    <string name="connecting">Connecting…</string>
+
+    <!-- Errors and Messages -->
+    <string name="error_network">No internet connection</string>
+    <string name="error_username_taken">Username is already taken</string>
+    <string name="error_generic">Something went wrong</string>
+    <string name="registration_success">Registration successful</string>
+    <string name="login_failed">Login failed</string>
+
+    <!-- UI Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="done">Done</string>
+    <string name="back">Back</string>
+    <string name="next">Next</string>
+    <string name="continue">Continue</string>
+    <string name="secure">Secure</string>
+
+</resources>

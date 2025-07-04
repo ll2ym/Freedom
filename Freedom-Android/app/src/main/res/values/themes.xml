@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Base application theme -->
+    <style name="Theme.Freedom" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary branding colors -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- Backgrounds -->
+        <item name="android:windowBackground">@color/backgroundLight</item>
+        <item name="android:navigationBarColor">@color/backgroundLight</item>
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
+
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/textPrimary</item>
+        <item name="android:textColorSecondary">@color/textSecondary</item>
+
+        <!-- Customize material components -->
+        <item name="android:buttonStyle">@style/Freedom.Button</item>
+
+        <!-- Disable action bar -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <!-- Button style -->
+    <style name="Freedom.Button" parent="Widget.Material3.Button">
+        <item name="android:backgroundTint">@color/buttonNormal</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+</resources>

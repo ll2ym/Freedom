@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Brand Colors -->
+    <color name="colorPrimary">#4B5563</color>         <!-- Slate Gray -->
+    <color name="colorPrimaryDark">#1F2937</color>     <!-- Darker Gray -->
+    <color name="colorAccent">#10B981</color>          <!-- Emerald Green -->
+
+    <!-- Backgrounds -->
+    <color name="backgroundLight">#F9FAFB</color>      <!-- Near white -->
+    <color name="backgroundDark">#111827</color>       <!-- Near black -->
+
+    <!-- Text -->
+    <color name="textPrimary">#111827</color>          <!-- Black-ish -->
+    <color name="textSecondary">#6B7280</color>        <!-- Muted gray -->
+    <color name="textOnDark">#F3F4F6</color>           <!-- Light text -->
+
+    <!-- Chat Bubbles -->
+    <color name="chatBubbleSent">#DCF8C6</color>       <!-- Light green -->
+    <color name="chatBubbleReceived">#E5E7EB</color>   <!-- Light gray -->
+    
+    <!-- Borders / Dividers -->
+    <color name="dividerColor">#E5E7EB</color>
+
+    <!-- Error / Alert -->
+    <color name="errorColor">#EF4444</color>           <!-- Red -->
+
+    <!-- Status / Success -->
+    <color name="successColor">#22C55E</color>         <!-- Bright green -->
+
+    <!-- Button States -->
+    <color name="buttonNormal">#3B82F6</color>         <!-- Blue -->
+    <color name="buttonPressed">#2563EB</color>        <!-- Darker Blue -->
+
+</resources>
