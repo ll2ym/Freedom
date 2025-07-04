@@ -1,0 +1,19 @@
+{
+  "name": "freedom-project-docs",
+  "version": "1.0.0",
+  "description": "Documentation and build scripts for Freedom secure communication platform",
+  "scripts": {
+    "android:build": "cd Freedom-Android && ./gradlew build",
+    "android:test": "cd Freedom-Android && ./gradlew test",
+    "server:dev": "cd Freedom-server && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload",
+    "server:build": "cd Freedom-server && docker build -t freedom-server .",
+    "server:start": "cd Freedom-server && docker run -p 8000:8000 freedom-server",
+    "build": "echo 'Building Android app...' && cd Freedom-Android && ./gradlew build && echo 'Building server Docker image...' && cd ../Freedom-server && docker build -t freedom-server .",
+    "dev": "echo 'Starting development server...' && cd Freedom-server && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+  },
+  "keywords": ["android", "python", "fastapi", "secure-communication"],
+  "author": "Freedom Team",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}
