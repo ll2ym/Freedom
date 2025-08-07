@@ -9,6 +9,7 @@ from utils.db import get_db
 from utils.config import JWT_SECRET, JWT_ALGORITHM
 from models.user import User
 from services.invite import validate_invite
+from utils.token import get_current_user_from_token
 
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -29,6 +30,15 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+class ProfileUpdateRequest(BaseModel):
+    display_name: str
+    status: str
+
+class UserResponse(BaseModel):
+    username: str
+    display_name: str | None
+    status: str | None
 
 # ==== Helper Functions ====
 
@@ -69,3 +79,15 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
 
     token = create_access_token({"sub": user.username})
     return TokenResponse(access_token=token)
+
+@router.get("/me", response_model=UserResponse)
+def get_me(current_user: User = Depends(get_current_user_from_token)):
+    return current_user
+
+@router.put("/me", response_model=UserResponse)
+def update_me(req: ProfileUpdateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user_from_token)):
+    current_user.display_name = req.display_name
+    current_user.status = req.status
+    db.commit()
+    db.refresh(current_user)
+    return current_user

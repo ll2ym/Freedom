@@ -13,6 +13,12 @@ interface ApiService {
 
     @GET("auth/me")
     suspend fun getCurrentUser(@Header("Authorization") token: String): Response<UserResponse>
+
+    @PUT("auth/me")
+    suspend fun updateUser(
+        @Header("Authorization") token: String,
+        @Body request: ProfileUpdateRequest
+    ): Response<UserResponse>
 }
 
 data class LoginRequest(
@@ -35,7 +41,16 @@ data class AuthResponse(
 )
 
 data class UserResponse(
-    val username: String
+    val username: String,
+    @SerializedName("display_name")
+    val displayName: String?,
+    val status: String?
+)
+
+data class ProfileUpdateRequest(
+    @SerializedName("display_name")
+    val displayName: String,
+    val status: String
 )
 
 data class MessageResponse(

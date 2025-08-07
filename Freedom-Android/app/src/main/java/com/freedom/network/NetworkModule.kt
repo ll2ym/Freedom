@@ -3,8 +3,11 @@ package com.freedom.network
 import com.freedom.utils.Constants
 import dagger.Module
 import dagger.Provides
+import android.content.Context
+import com.freedom.storage.SecurePrefs
 import dagger.hilt.InstallIn
 import com.google.gson.Gson
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.*
 import io.ktor.client.plugins.websocket.*
@@ -62,5 +65,11 @@ object NetworkModule {
     @Singleton
     fun provideGson(): Gson {
         return Gson()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSecurePrefs(@ApplicationContext context: Context): SecurePrefs {
+        return SecurePrefs(context)
     }
 }

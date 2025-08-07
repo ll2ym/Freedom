@@ -9,6 +9,8 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, nullable=False, index=True)
     password_hash = Column(String, nullable=False)
+    display_name = Column(String, nullable=True)
+    status = Column(String, nullable=True)
 
     registered_at = Column(DateTime, default=datetime.utcnow)
     last_seen = Column(DateTime, default=datetime.utcnow)

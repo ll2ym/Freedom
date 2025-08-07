@@ -25,7 +25,7 @@ fun PinScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Enter PIN")
+        Text(text = if (viewModel.hasPin.value) "Enter PIN" else "Create a new PIN")
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = "*".repeat(pin.length))
         Spacer(modifier = Modifier.height(32.dp))

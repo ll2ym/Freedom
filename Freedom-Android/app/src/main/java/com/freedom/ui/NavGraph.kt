@@ -9,7 +9,7 @@ import com.freedom.auth.RegisterScreen
 import com.freedom.ui.screens.SplashScreen
 import com.freedom.ui.screens.OnboardingScreen
 import com.freedom.ui.screens.HomeScreen
-import com.freedom.ui.screens.SettingsScreen
+import com.freedom.ui.settings.SettingsScreen
 import com.freedom.ui.chat.ChatScreen
 import com.freedom.storage.SecurePrefs
 
@@ -90,20 +90,7 @@ fun NavGraph() {
             }
 
             composable("settings") {
-                SettingsScreen(
-                    navController = navController,
-                    currentUser = getCurrentUser(),
-                    onLogout = {
-                        SecurePrefs.clear()
-                        isLoggedIn = false
-                        navController.navigate("login") {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    },
-                    onResetKeys = {
-                        // Reset encryption keys
-                    }
-                )
+            SettingsScreen()
             }
         }
     }
