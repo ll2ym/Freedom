@@ -1,5 +1,6 @@
 package com.freedom.network
 
+import com.google.gson.annotations.SerializedName
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -10,20 +11,8 @@ interface ApiService {
     @POST("auth/register")
     suspend fun register(@Body request: RegisterRequest): Response<AuthResponse>
 
-    @GET("users/me")
+    @GET("auth/me")
     suspend fun getCurrentUser(@Header("Authorization") token: String): Response<UserResponse>
-
-    @GET("messages")
-    suspend fun getMessages(
-        @Header("Authorization") token: String,
-        @Query("with") username: String
-    ): Response<List<MessageResponse>>
-
-    @POST("messages")
-    suspend fun sendMessage(
-        @Header("Authorization") token: String,
-        @Body message: SendMessageRequest
-    ): Response<MessageResponse>
 }
 
 data class LoginRequest(
@@ -34,18 +23,19 @@ data class LoginRequest(
 data class RegisterRequest(
     val username: String,
     val password: String,
+    @SerializedName("invite_code")
     val inviteCode: String
 )
 
 data class AuthResponse(
+    @SerializedName("access_token")
     val accessToken: String,
+    @SerializedName("token_type")
     val tokenType: String = "bearer"
 )
 
 data class UserResponse(
-    val username: String,
-    val displayName: String,
-    val avatarUrl: String?
+    val username: String
 )
 
 data class MessageResponse(

@@ -2,47 +2,49 @@ package com.freedom.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.freedom.data.ChatRepository
-import com.freedom.data.MessageModel
+import com.freedom.network.WebSocketManager
+import com.google.gson.Gson
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.util.*
+import javax.inject.Inject
 
-class ChatViewModel(
-    private val repository: ChatRepository,
-    val chatPartnerId: String,
-    private val currentUserId: String
+@HiltViewModel
+class ChatViewModel @Inject constructor(
+    private val webSocketManager: WebSocketManager,
+    private val gson: Gson
 ) : ViewModel() {
 
-    private val _messages = MutableStateFlow<List<MessageModel>>(emptyList())
-    val messages: StateFlow<List<MessageModel>> = _messages
+    private val _messages = MutableStateFlow<List<Message>>(emptyList())
+    val messages: StateFlow<List<Message>> = _messages
 
     init {
-        observeMessages()
-    }
-
-    private fun observeMessages() {
         viewModelScope.launch {
-            repository.getMessages(chatPartnerId).collect { newMessages ->
-                _messages.value = newMessages.sortedBy { it.timestamp }
+            webSocketManager.connect("your_auth_token") // Replace with actual token
+            webSocketManager.messages.collect { messageJson ->
+                val message = gson.fromJson(messageJson, Message::class.java)
+                _messages.value = _messages.value + message
             }
         }
     }
 
-    fun sendMessage(text: String) {
-        if (text.isBlank()) return
-
-        val message = MessageModel(
-            id = UUID.randomUUID().toString(),
-            text = text,
-            senderId = currentUserId,
-            receiverId = chatPartnerId,
-            timestamp = System.currentTimeMillis()
-        )
-
+    fun sendMessage(text: String, to: String) {
         viewModelScope.launch {
-            repository.sendMessage(message)
+            val message = mapOf("to" to to, "text" to text)
+            webSocketManager.sendMessage(gson.toJson(message))
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        webSocketManager.disconnect()
+    }
 }
+
+data class Message(
+    val from: String,
+    val to: String,
+    val text: String,
+    val timestamp: Long
+)
