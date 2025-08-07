@@ -1,15 +1,8 @@
 import pytest
-from fastapi.testclient import TestClient
-from app.main import app
 from services import invite
 
-client = TestClient(app)
-
-@pytest.fixture(scope="module")
-def invite_code():
-    return invite.generate_invite_code("test-admin", valid_days=1)
-
-def test_register_success(invite_code):
+def test_register_success(client):
+    invite_code = invite.generate_invite_code("test-admin", valid_days=1)
     response = client.post("/auth/register", json={
         "username": "testuser1",
         "password": "securePass123",
@@ -18,7 +11,13 @@ def test_register_success(invite_code):
     assert response.status_code == 200
     assert "access_token" in response.json()
 
-def test_register_duplicate_username(invite_code):
+def test_register_duplicate_username(client):
+    invite_code = invite.generate_invite_code("test-admin", valid_days=1)
+    client.post("/auth/register", json={
+        "username": "testuser1",
+        "password": "securePass123",
+        "invite_code": invite_code
+    })
     response = client.post("/auth/register", json={
         "username": "testuser1",
         "password": "anotherPassword",
@@ -27,7 +26,7 @@ def test_register_duplicate_username(invite_code):
     assert response.status_code == 400
     assert response.json()["detail"] == "Username already exists"
 
-def test_register_invalid_invite():
+def test_register_invalid_invite(client):
     response = client.post("/auth/register", json={
         "username": "testuser2",
         "password": "anotherPass",
@@ -36,7 +35,13 @@ def test_register_invalid_invite():
     assert response.status_code == 400
     assert response.json()["detail"] == "Invalid invite code"
 
-def test_login_success():
+def test_login_success(client):
+    invite_code = invite.generate_invite_code("test-admin", valid_days=1)
+    client.post("/auth/register", json={
+        "username": "testuser1",
+        "password": "securePass123",
+        "invite_code": invite_code
+    })
     response = client.post("/auth/login", json={
         "username": "testuser1",
         "password": "securePass123"
@@ -44,7 +49,13 @@ def test_login_success():
     assert response.status_code == 200
     assert "access_token" in response.json()
 
-def test_login_wrong_password():
+def test_login_wrong_password(client):
+    invite_code = invite.generate_invite_code("test-admin", valid_days=1)
+    client.post("/auth/register", json={
+        "username": "testuser1",
+        "password": "securePass123",
+        "invite_code": invite_code
+    })
     response = client.post("/auth/login", json={
         "username": "testuser1",
         "password": "wrongPass"
@@ -52,7 +63,7 @@ def test_login_wrong_password():
     assert response.status_code == 401
     assert response.json()["detail"] == "Invalid credentials"
 
-def test_login_user_not_found():
+def test_login_user_not_found(client):
     response = client.post("/auth/login", json={
         "username": "nonexistent",
         "password": "anyPass"

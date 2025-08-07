@@ -1,59 +1,37 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from typing import Dict, List
-import json
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+from sqlalchemy.orm import Session
+from app.core.connections import ConnectionManager
+from utils.db import get_db
+from models.user import User
+from utils.token import get_current_user_from_token
 
-router = APIRouter()
+chat_router = APIRouter()
+manager = ConnectionManager()
 
-# Store connected users and their WebSocket sessions
-active_connections: Dict[str, WebSocket] = {}
+@chat_router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket, token: str = None, db: Session = Depends(get_db)):
+    if not token:
+        await websocket.close(code=1008)
+        return
 
-@router.websocket("/ws/{username}")
-async def chat_socket(websocket: WebSocket, username: str):
-    await websocket.accept()
-    active_connections[username] = websocket
-    print(f"[CHAT] {username} connected.")
+    user = get_current_user_from_token(token, db)
+    if not user:
+        await websocket.close(code=1008)
+        return
 
+    await manager.connect(websocket, user.username)
     try:
         while True:
-            data = await websocket.receive_text()
-            message = json.loads(data)
-
-            to_user = message.get("to")
-            msg_type = message.get("type")  # e.g., "text", "group", "delivery-receipt"
-            payload = message.get("payload")
-
-            if msg_type == "text" and to_user:
-                # Forward message to recipient
-                if to_user in active_connections:
-                    await active_connections[to_user].send_json({
-                        "from": username,
-                        "type": "text",
-                        "payload": payload
-                    })
-                else:
-                    await websocket.send_json({
-                        "type": "error",
-                        "message": f"User {to_user} is not online"
-                    })
-
-            elif msg_type == "group":
-                # Handle group message routing (optional: include DB lookup)
-                recipients: List[str] = payload.get("recipients", [])
-                for member in recipients:
-                    if member in active_connections and member != username:
-                        await active_connections[member].send_json({
-                            "from": username,
-                            "type": "group",
-                            "group_id": payload.get("group_id"),
-                            "payload": payload.get("message")
-                        })
-
+            data = await websocket.receive_json()
+            to = data.get("to")
+            if to:
+                message = {"from": user.username, "to": to, "type": "text", "payload": data.get("payload")}
+                if not await manager.send_personal_message(message, to):
+                    await websocket.send_json({"type": "error", "message": f"User {to} not online"})
             else:
-                await websocket.send_json({
-                    "type": "error",
-                    "message": "Invalid message type"
-                })
-
+                await manager.broadcast(data)
     except WebSocketDisconnect:
-        print(f"[CHAT] {username} disconnected.")
-        active_connections.pop(username, None)
+        manager.disconnect(user.username)
+    except Exception as e:
+        print(e)
+        manager.disconnect(user.username)

@@ -11,7 +11,10 @@ APP_ENV = os.getenv("APP_ENV", "development")
 APP_PORT = int(os.getenv("APP_PORT", 8000))
 
 # === Database ===
-DB_URL = os.getenv("DB_URL", "sqlite:///./freedom.db")
+if os.getenv("APP_ENV") == "test":
+    DB_URL = "sqlite:///:memory:"
+else:
+    DB_URL = os.getenv("DB_URL", "sqlite:///./freedom.db")
 
 # === JWT ===
 JWT_SECRET = os.getenv("JWT_SECRET", "change_this_secret")
