@@ -54,6 +54,22 @@
   @com.google.gson.annotations.SerializedName <fields>;
 }
 
-# Keep data classes
+# Keep data classes (but allow obfuscation of their members)
 -keep class com.freedom.data.** { *; }
 -keep class com.freedom.network.** { *; }
+
+# More aggressive obfuscation
+-useuniqueclassmembernames
+-obfuscationdictionary random-dictionary.txt
+-classobfuscationdictionary random-dictionary.txt
+-packageobfuscationdictionary random-dictionary.txt
+-overloadaggressively
+
+# Remove logging from release builds
+-assumenosideeffects class android.util.Log {
+    public static *** v(...);
+    public static *** d(...);
+    public static *** i(...);
+    public static *** w(...);
+    public static *** e(...);
+}

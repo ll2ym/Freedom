@@ -1,5 +1,6 @@
 import os
 import json
+import warnings
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -20,6 +21,17 @@ else:
 JWT_SECRET = os.getenv("JWT_SECRET", "change_this_secret")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 JWT_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", 1440))
+
+# Security warning for default JWT secret in production
+if APP_ENV == "production" and JWT_SECRET == "change_this_secret":
+    warnings.warn("SECURITY WARNING: Default JWT_SECRET is being used in a production environment. Please set a strong, unique secret in your .env file.", UserWarning)
+
+# === CORS ===
+CORS_ALLOWED_ORIGINS_str = os.getenv("CORS_ALLOWED_ORIGINS", "")
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ALLOWED_ORIGINS_str.split(",") if origin.strip()]
+if not CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS = ["*"] if APP_ENV == "development" else []
+
 
 # === Encryption ===
 # Optional: a base64-encoded 256-bit key for AES-GCM
