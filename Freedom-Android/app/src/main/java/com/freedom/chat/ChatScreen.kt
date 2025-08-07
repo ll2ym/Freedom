@@ -1,11 +1,9 @@
 package com.freedom.ui.chat
 
 import android.content.Intent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Send
@@ -17,17 +15,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.freedom.chat.ChatViewModel
-import com.freedom.data.model.Message
+import com.freedom.chat.Message
 import com.freedom.ui.calls.CallScreen
-import com.freedom.ui.theme.FreedomTheme
-import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
-    viewModel: ChatViewModel = viewModel(),
+    viewModel: ChatViewModel = hiltViewModel(),
     currentUser: String = "alice" // Replace with real username from secure prefs
 ) {
     val messages by viewModel.messages.collectAsState()
@@ -37,7 +33,7 @@ fun ChatScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Chat", color = Color.White) },
+                title = { Text("Chat with bob", color = Color.White) },
                 actions = {
                     IconButton(onClick = {
                         val intent = Intent(context, CallScreen::class.java)
@@ -70,7 +66,7 @@ fun ChatScreen(
                     onClick = {
                         val text = inputText.text.trim()
                         if (text.isNotEmpty()) {
-                            viewModel.sendMessage(text, currentUser)
+                            viewModel.sendMessage(text, "bob")
                             inputText = TextFieldValue("")
                         }
                     }
@@ -100,7 +96,7 @@ fun ChatScreen(
                     reverseLayout = true
                 ) {
                     items(messages.reversed()) { message ->
-                        MessageBubble(message = message, isCurrentUser = message.sender == currentUser)
+                        MessageBubble(message = message, isCurrentUser = message.from == currentUser)
                     }
                 }
             }
@@ -124,7 +120,7 @@ fun MessageBubble(message: Message, isCurrentUser: Boolean) {
             Column(modifier = Modifier.padding(8.dp)) {
                 if (!isCurrentUser) {
                     Text(
-                        message.sender,
+                        message.from,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )

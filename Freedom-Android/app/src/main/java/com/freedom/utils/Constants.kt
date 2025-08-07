@@ -3,11 +3,11 @@ package com.freedom.utils
 object Constants {
 
     // Server API base URL
-    const val BASE_URL = "https://your-secure-server.com/api"
+    const val BASE_URL = "http://10.0.2.2:8000/"
 
     // WebSocket endpoints
-    const val CHAT_SOCKET_URL = "wss://your-secure-server.com/ws/chat"
-    const val CALL_SOCKET_URL = "wss://your-secure-server.com/ws/call"
+    const val CHAT_SOCKET_URL = "ws://10.0.2.2:8000/chat/ws"
+    const val CALL_SOCKET_URL = "ws://10.0.2.2:8000/calls/ws"
 
     // Encryption
     const val ENCRYPTION_ENABLED = true
