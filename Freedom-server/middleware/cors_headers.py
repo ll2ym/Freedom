@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
+from utils.config import CORS_ALLOWED_ORIGINS
 
 # Optional: Add security headers (like HSTS, XSS protection)
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -19,7 +20,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 def add_cors_and_security_headers(app: FastAPI):
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # Replace "*" with specific domains in production
+        allow_origins=CORS_ALLOWED_ORIGINS,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

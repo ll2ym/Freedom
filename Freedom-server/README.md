@@ -54,7 +54,7 @@ This is the recommended way to run the server in production. It uses Docker and 
     ```bash
     cp .env.example .env
     ```
-    Make sure to set a strong `POSTGRES_PASSWORD` and `JWT_SECRET`.
+    Make sure to set a strong `POSTGRES_PASSWORD` and `JWT_SECRET`. For enhanced security, it is also recommended to create a dedicated database user with the minimum necessary permissions, rather than using a superuser.
 
 2.  **Build and run the containers:**
     ```bash

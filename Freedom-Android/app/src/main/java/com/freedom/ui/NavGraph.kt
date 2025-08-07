@@ -13,91 +13,98 @@ import com.freedom.ui.screens.SettingsScreen
 import com.freedom.ui.chat.ChatScreen
 import com.freedom.storage.SecurePrefs
 
+import com.freedom.ui.pin.PinScreen
+
 @Composable
 fun NavGraph() {
     val navController = rememberNavController()
     var isLoggedIn by remember { mutableStateOf(false) }
-    
+    var isPinAuthenticated by remember { mutableStateOf(false) }
+
     // Check if user is already logged in
     LaunchedEffect(Unit) {
         val token = SecurePrefs.getString("auth_token")
         isLoggedIn = !token.isNullOrEmpty()
     }
 
-    NavHost(
-        navController = navController,
-        startDestination = if (isLoggedIn) "home" else "splash"
-    ) {
-        composable("splash") {
-            SplashScreen(navController)
-        }
-        
-        composable("onboarding") {
-            OnboardingScreen(navController)
-        }
-        
-        composable("login") {
-            LoginScreen(
-                onLoginSuccess = {
-                    isLoggedIn = true
-                    navController.navigate("home") {
-                        popUpTo("login") { inclusive = true }
+    if (!isPinAuthenticated) {
+        PinScreen(onPinSuccess = { isPinAuthenticated = true })
+    } else {
+        NavHost(
+            navController = navController,
+            startDestination = if (isLoggedIn) "home" else "splash"
+        ) {
+            composable("splash") {
+                SplashScreen(navController)
+            }
+
+            composable("onboarding") {
+                OnboardingScreen(navController)
+            }
+
+            composable("login") {
+                LoginScreen(
+                    onLoginSuccess = {
+                        isLoggedIn = true
+                        navController.navigate("home") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    },
+                    onNavigateToRegister = {
+                        navController.navigate("register")
                     }
-                },
-                onNavigateToRegister = {
-                    navController.navigate("register")
-                }
-            )
-        }
-        
-        composable("register") {
-            RegisterScreen(
-                onRegisterSuccess = {
-                    isLoggedIn = true
-                    navController.navigate("home") {
-                        popUpTo("register") { inclusive = true }
+                )
+            }
+
+            composable("register") {
+                RegisterScreen(
+                    onRegisterSuccess = {
+                        isLoggedIn = true
+                        navController.navigate("home") {
+                            popUpTo("register") { inclusive = true }
+                        }
+                    },
+                    onNavigateToLogin = {
+                        navController.navigate("login")
                     }
-                },
-                onNavigateToLogin = {
-                    navController.navigate("login")
-                }
-            )
-        }
-        
-        composable("home") {
-            HomeScreen(
-                navController = navController,
-                currentUser = getCurrentUser(),
-                recentChats = getRecentChats(),
-                onNewChatClick = {
-                    navController.navigate("chat/new")
-                }
-            )
-        }
-        
-        composable("chat/{userId}") { backStackEntry ->
-            val userId = backStackEntry.arguments?.getString("userId") ?: ""
-            ChatScreen(
-                userId = userId,
-                onBack = { navController.popBackStack() }
-            )
-        }
-        
-        composable("settings") {
-            SettingsScreen(
-                navController = navController,
-                currentUser = getCurrentUser(),
-                onLogout = {
-                    SecurePrefs.clear()
-                    isLoggedIn = false
-                    navController.navigate("login") {
-                        popUpTo(0) { inclusive = true }
+                )
+            }
+
+            composable("home") {
+                HomeScreen(
+                    navController = navController,
+                    currentUser = getCurrentUser(),
+                    recentChats = getRecentChats(),
+                    onNewChatClick = {
+                        navController.navigate("chat/new")
                     }
-                },
-                onResetKeys = {
-                    // Reset encryption keys
-                }
-            )
+                )
+            }
+
+            composable("chat/{userId}") { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId") ?: ""
+                ChatScreen(
+                    userId = userId,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable("settings") {
+                SettingsScreen(
+                    navController = navController,
+                    currentUser = getCurrentUser(),
+                    onLogout = {
+                        SecurePrefs.clear()
+                        isLoggedIn = false
+                        navController.navigate("login") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    onResetKeys = {
+                        // Reset encryption keys
+                    }
+                )
+            }
         }
     }
 }
