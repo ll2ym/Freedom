@@ -6,7 +6,7 @@ from jose import jwt
 from datetime import datetime, timedelta
 
 from utils.db import get_db
-from utils.config import SECRET_KEY
+from utils.config import JWT_SECRET, JWT_ALGORITHM
 from models.user import User
 from services.invite import validate_invite
 
@@ -36,7 +36,7 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 # ==== Routes ====
 

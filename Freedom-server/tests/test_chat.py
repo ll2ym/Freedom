@@ -1,14 +1,23 @@
 import json
 import pytest
-from fastapi.testclient import TestClient
-from app.main import app
-
-client = TestClient(app)
+from services import invite
 
 @pytest.fixture
-def websocket_clients():
-    with client.websocket_connect("/ws/alice") as alice_ws, \
-         client.websocket_connect("/ws/bob") as bob_ws:
+def authenticated_tokens(client):
+    # Register and login two users
+    invite_code = invite.generate_invite_code("test-admin")
+    client.post("/auth/register", json={"username": "alice", "password": "password", "invite_code": invite_code})
+    client.post("/auth/register", json={"username": "bob", "password": "password", "invite_code": invite_code})
+    alice_token = client.post("/auth/login", json={"username": "alice", "password": "password"}).json()["access_token"]
+    bob_token = client.post("/auth/login", json={"username": "bob", "password": "password"}).json()["access_token"]
+    return {"alice": alice_token, "bob": bob_token}
+
+@pytest.fixture
+def websocket_clients(client, authenticated_tokens):
+    alice_token = authenticated_tokens["alice"]
+    bob_token = authenticated_tokens["bob"]
+    with client.websocket_connect(f"/chat/ws?token={alice_token}") as alice_ws, \
+         client.websocket_connect(f"/chat/ws?token={bob_token}") as bob_ws:
         yield alice_ws, bob_ws
 
 def test_websocket_message_exchange(websocket_clients):
@@ -33,8 +42,9 @@ def test_websocket_message_exchange(websocket_clients):
     assert received["type"] == "text"
     assert received["payload"]["message"] == "Hello Bob!"
 
-def test_send_to_offline_user():
-    with client.websocket_connect("/ws/alice") as alice_ws:
+def test_send_to_offline_user(client, authenticated_tokens):
+    alice_token = authenticated_tokens["alice"]
+    with client.websocket_connect(f"/chat/ws?token={alice_token}") as alice_ws:
         message_payload = {
             "to": "charlie",
             "type": "text",
