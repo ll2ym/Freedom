@@ -2,11 +2,19 @@ package com.freedom.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.freedom.network.ApiService
+import com.freedom.network.LoginRequest
+import com.freedom.network.RegisterRequest
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AuthViewModel : ViewModel() {
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val apiService: ApiService
+) : ViewModel() {
     private val _loginState = MutableStateFlow<AuthState?>(null)
     val loginState: StateFlow<AuthState?> = _loginState
 
@@ -15,20 +23,30 @@ class AuthViewModel : ViewModel() {
 
     fun login(username: String, password: String) {
         viewModelScope.launch {
-            if (username == "test" && password == "pass") {
-                _loginState.value = AuthState(success = true)
-            } else {
-                _loginState.value = AuthState(error = "Invalid credentials")
+            try {
+                val response = apiService.login(LoginRequest(username, password))
+                if (response.isSuccessful) {
+                    _loginState.value = AuthState(success = true, token = response.body()?.accessToken)
+                } else {
+                    _loginState.value = AuthState(error = response.message())
+                }
+            } catch (e: Exception) {
+                _loginState.value = AuthState(error = e.message)
             }
         }
     }
 
     fun register(username: String, password: String, inviteCode: String) {
         viewModelScope.launch {
-            if (inviteCode == "invite123") {
-                _registerState.value = AuthState(success = true)
-            } else {
-                _registerState.value = AuthState(error = "Invalid invite code")
+            try {
+                val response = apiService.register(RegisterRequest(username, password, inviteCode))
+                if (response.isSuccessful) {
+                    _registerState.value = AuthState(success = true, token = response.body()?.accessToken)
+                } else {
+                    _registerState.value = AuthState(error = response.message())
+                }
+            } catch (e: Exception) {
+                _registerState.value = AuthState(error = e.message)
             }
         }
     }
@@ -36,5 +54,8 @@ class AuthViewModel : ViewModel() {
 
 data class AuthState(
     val success: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val token: String? = null
 )
+
+

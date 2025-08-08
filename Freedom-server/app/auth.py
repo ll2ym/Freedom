@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from utils.db import get_db
 from utils.config import JWT_SECRET, JWT_ALGORITHM
 from models.user import User
-from services.invite import validate_invite
+from services.invite import validate_invite, mark_invite_used
 
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -57,6 +57,8 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    mark_invite_used(req.invite_code)
 
     token = create_access_token({"sub": user.username})
     return TokenResponse(access_token=token)

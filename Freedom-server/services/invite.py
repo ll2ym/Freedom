@@ -54,3 +54,16 @@ def mark_invite_used(code: str):
     if code in store:
         store[code]["used"] = True
         _save_invite_store(store)
+
+
+# === Update auth.py to use mark_invite_used ===
+
+# In app/auth.py, within the register function, after db.refresh(user):
+# from services.invite import validate_invite, mark_invite_used
+# ...
+#    db.refresh(user)
+#    mark_invite_used(req.invite_code) # Add this line
+#    token = create_access_token({"sub": user.username})
+# ...
+
+
