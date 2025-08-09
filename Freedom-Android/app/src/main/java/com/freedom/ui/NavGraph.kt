@@ -6,75 +6,82 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.freedom.auth.LoginScreen
 import com.freedom.auth.RegisterScreen
-import com.freedom.ui.screens.SplashScreen
-import com.freedom.ui.screens.OnboardingScreen
-import com.freedom.ui.screens.HomeScreen
-import com.freedom.ui.settings.SettingsScreen
-import com.freedom.ui.chat.ChatScreen
 import com.freedom.storage.SecurePrefs
-
+import com.freedom.ui.chat.ChatScreen
 import com.freedom.ui.pin.PinScreen
+import com.freedom.ui.pin.SetPinScreen
+import com.freedom.ui.screens.HomeScreen
+import com.freedom.ui.screens.OnboardingScreen
+import com.freedom.ui.screens.SplashScreen
+import com.freedom.ui.settings.SettingsScreen
+
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.freedom.auth.AuthViewModel
 
 @Composable
-fun NavGraph() {
+fun NavGraph(
+    authViewModel: AuthViewModel = hiltViewModel()
+) {
     val navController = rememberNavController()
-    var isLoggedIn by remember { mutableStateOf(false) }
-    var isPinAuthenticated by remember { mutableStateOf(false) }
+    val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
 
-    // Check if user is already logged in
-    LaunchedEffect(Unit) {
-        val token = SecurePrefs.getString("auth_token")
-        isLoggedIn = !token.isNullOrEmpty()
-    }
+    NavHost(
+        navController = navController,
+        startDestination = "splash"
+    ) {
+        composable("splash") {
+            SplashScreen(navController)
+        }
 
-    if (!isPinAuthenticated) {
-        PinScreen(onPinSuccess = { isPinAuthenticated = true })
-    } else {
-        NavHost(
-            navController = navController,
-            startDestination = if (isLoggedIn) "home" else "splash"
-        ) {
-            composable("splash") {
-                SplashScreen(navController)
-            }
+        composable("onboarding") {
+            OnboardingScreen(navController)
+        }
 
-            composable("onboarding") {
-                OnboardingScreen(navController)
-            }
+        composable("set_pin") {
+            SetPinScreen(onPinSet = {
+                navController.navigate("home") {
+                    popUpTo("set_pin") { inclusive = true }
+                }
+            })
+        }
 
-            composable("login") {
-                LoginScreen(
-                    onLoginSuccess = {
-                        isLoggedIn = true
-                        navController.navigate("home") {
-                            popUpTo("login") { inclusive = true }
-                        }
-                    },
-                    onNavigateToRegister = {
-                        navController.navigate("register")
+        composable("login") {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate("pin") {
+                        popUpTo("login") { inclusive = true }
                     }
-                )
-            }
+                },
+                onNavigateToRegister = {
+                    navController.navigate("register")
+                }
+            )
+        }
 
-            composable("register") {
-                RegisterScreen(
-                    onRegisterSuccess = {
-                        isLoggedIn = true
-                        navController.navigate("home") {
-                            popUpTo("register") { inclusive = true }
-                        }
-                    },
-                    onNavigateToLogin = {
-                        navController.navigate("login")
+        composable("register") {
+            RegisterScreen(
+                onRegisterSuccess = {
+                    navController.navigate("set_pin") {
+                        popUpTo("register") { inclusive = true }
                     }
-                )
-            }
+                },
+                onNavigateToLogin = {
+                    navController.navigate("login")
+                }
+            )
+        }
+
+        composable("pin") {
+            PinScreen(onPinSuccess = {
+                navController.navigate("home") {
+                    popUpTo("pin") { inclusive = true }
+                }
+            })
+        }
 
             composable("home") {
                 HomeScreen(
                     navController = navController,
-                    currentUser = getCurrentUser(),
-                    recentChats = getRecentChats(),
                     onNewChatClick = {
                         navController.navigate("chat/new")
                     }
@@ -84,29 +91,13 @@ fun NavGraph() {
             composable("chat/{userId}") { backStackEntry ->
                 val userId = backStackEntry.arguments?.getString("userId") ?: ""
                 ChatScreen(
-                    userId = userId,
                     onBack = { navController.popBackStack() }
                 )
             }
 
             composable("settings") {
-            SettingsScreen()
+                SettingsScreen()
             }
         }
     }
-}
-
-// Helper functions - these should be moved to proper repositories
-private fun getCurrentUser(): com.freedom.data.User {
-    val username = SecurePrefs.getString("username", "")
-    return com.freedom.data.User(
-        username = username,
-        displayName = username,
-        isTrusted = true
-    )
-}
-
-private fun getRecentChats(): List<com.freedom.data.User> {
-    // This should fetch from database
-    return emptyList()
 }

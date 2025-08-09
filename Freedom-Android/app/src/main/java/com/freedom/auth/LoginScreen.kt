@@ -6,16 +6,24 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    viewModel: AuthViewModel = viewModel()
+    onNavigateToRegister: () -> Unit,
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val loginState by viewModel.loginState.collectAsState()
+    val isLoggedIn by viewModel.isLoggedIn.collectAsState()
+    val error by viewModel.loginError.collectAsState()
+
+    LaunchedEffect(isLoggedIn) {
+        if (isLoggedIn) {
+            onLoginSuccess()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -23,6 +31,8 @@ fun LoginScreen(
             .padding(32.dp),
         verticalArrangement = Arrangement.Center
     ) {
+        Text("Log In", style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.height(24.dp))
         TextField(
             value = username,
             onValueChange = { username = it },
@@ -48,13 +58,15 @@ fun LoginScreen(
             Text("Log In")
         }
 
-        loginState?.let { state ->
-            if (state.success) {
-                onLoginSuccess()
-            } else if (state.error != null) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(state.error!!, color = MaterialTheme.colorScheme.error)
-            }
+        error?.let {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(it, color = MaterialTheme.colorScheme.error)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextButton(onClick = onNavigateToRegister) {
+            Text("Don't have an account? Register")
         }
     }
 }

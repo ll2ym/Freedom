@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -7,14 +7,14 @@ from datetime import datetime
 from utils.db import get_db
 from models.group import Group, GroupMember
 from models.user import User
-from utils.jwt import get_current_user
+from utils.token import get_current_user
 
 router = APIRouter()
 
 # === Request models ===
 
 class CreateGroupRequest(BaseModel):
-    name: str
+    name: str = Field(..., min_length=3, max_length=30)
     members: List[str]  # List of usernames to add
 
 class AddMemberRequest(BaseModel):
@@ -72,6 +72,11 @@ def add_member(req: AddMemberRequest, db: Session = Depends(get_db), current_use
 
 @router.get("/{group_id}/members", response_model=List[str])
 def get_members(group_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Check if the current user is a member of the group
+    is_member = db.query(GroupMember).filter_by(group_id=group_id, user_id=current_user.id).first()
+    if not is_member:
+        raise HTTPException(status_code=403, detail="You are not a member of this group")
+
     members = (
         db.query(User.username)
         .join(GroupMember, User.id == GroupMember.user_id)

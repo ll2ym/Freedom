@@ -4,18 +4,20 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object SecurePrefs {
+@Singleton
+class SecurePrefs @Inject constructor(@ApplicationContext context: Context) {
 
-    private const val PREF_FILE_NAME = "secure_prefs"
+    private val prefs: SharedPreferences
 
-    private lateinit var prefs: SharedPreferences
-
-    fun init(context: Context) {
+    init {
         val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
 
         prefs = EncryptedSharedPreferences.create(
-            PREF_FILE_NAME,
+            "secure_prefs",
             masterKeyAlias,
             context,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
@@ -45,6 +47,14 @@ object SecurePrefs {
 
     fun getBoolean(key: String, default: Boolean = false): Boolean {
         return prefs.getBoolean(key, default)
+    }
+
+    fun putLong(key: String, value: Long) {
+        prefs.edit().putLong(key, value).apply()
+    }
+
+    fun getLong(key: String, default: Long = 0): Long {
+        return prefs.getLong(key, default)
     }
 
     fun remove(key: String) {

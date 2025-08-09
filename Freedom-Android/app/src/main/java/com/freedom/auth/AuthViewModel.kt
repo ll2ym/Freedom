@@ -2,39 +2,78 @@ package com.freedom.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.freedom.storage.SecurePrefs
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AuthViewModel : ViewModel() {
-    private val _loginState = MutableStateFlow<AuthState?>(null)
-    val loginState: StateFlow<AuthState?> = _loginState
+import com.freedom.network.ApiService
+import com.freedom.network.LoginRequest
+import com.freedom.network.RegisterRequest
 
-    private val _registerState = MutableStateFlow<AuthState?>(null)
-    val registerState: StateFlow<AuthState?> = _registerState
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val securePrefs: SecurePrefs,
+    private val apiService: ApiService
+) : ViewModel() {
+
+    private val _isLoggedIn = MutableStateFlow(false)
+    val isLoggedIn = _isLoggedIn.asStateFlow()
+
+    private val _loginError = MutableStateFlow<String?>(null)
+    val loginError = _loginError.asStateFlow()
+
+    init {
+        checkUserLoggedIn()
+    }
+
+    private fun checkUserLoggedIn() {
+        viewModelScope.launch {
+            val token = securePrefs.getString("auth_token")
+            _isLoggedIn.value = !token.isNullOrEmpty()
+        }
+    }
 
     fun login(username: String, password: String) {
         viewModelScope.launch {
-            if (username == "test" && password == "pass") {
-                _loginState.value = AuthState(success = true)
-            } else {
-                _loginState.value = AuthState(error = "Invalid credentials")
+            try {
+                val response = apiService.login(LoginRequest(username, password))
+                if (response.isSuccessful && response.body() != null) {
+                    securePrefs.putString("auth_token", response.body()!!.accessToken)
+                    _isLoggedIn.value = true
+                    _loginError.value = null
+                } else {
+                    _loginError.value = "Invalid credentials"
+                }
+            } catch (e: Exception) {
+                _loginError.value = "An error occurred"
             }
+        }
+    }
+
+    fun onLogout() {
+        viewModelScope.launch {
+            securePrefs.clear()
+            _isLoggedIn.value = false
         }
     }
 
     fun register(username: String, password: String, inviteCode: String) {
         viewModelScope.launch {
-            if (inviteCode == "invite123") {
-                _registerState.value = AuthState(success = true)
-            } else {
-                _registerState.value = AuthState(error = "Invalid invite code")
+            try {
+                val response = apiService.register(RegisterRequest(username, password, inviteCode))
+                if (response.isSuccessful && response.body() != null) {
+                    securePrefs.putString("auth_token", response.body()!!.accessToken)
+                    _isLoggedIn.value = true
+                    _loginError.value = null
+                } else {
+                    _loginError.value = response.errorBody()?.string() ?: "An error occurred"
+                }
+            } catch (e: Exception) {
+                _loginError.value = "An error occurred"
             }
         }
     }
 }
-
-data class AuthState(
-    val success: Boolean = false,
-    val error: String? = null
-)

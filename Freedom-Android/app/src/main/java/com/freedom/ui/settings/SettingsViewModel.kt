@@ -2,6 +2,8 @@ package com.freedom.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.freedom.network.ApiService
+import com.freedom.network.ProfileUpdateRequest
 import com.freedom.storage.SecurePrefs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +23,8 @@ data class SettingsUiState(
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val securePrefs: SecurePrefs
+    private val securePrefs: SecurePrefs,
+    private val apiService: ApiService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -82,6 +85,18 @@ class SettingsViewModel @Inject constructor(
             securePrefs.putString("wipe_after_no_connection", _uiState.value.wipeAfterNoConnection)
             securePrefs.putString("duress_pin", _uiState.value.duressPin)
             securePrefs.putString("duress_message", _uiState.value.duressMessage)
+
+            // Also update the user profile on the server
+            val token = securePrefs.getString("auth_token")
+            if (token != null) {
+                apiService.updateUser(
+                    "Bearer $token",
+                    ProfileUpdateRequest(
+                        displayName = _uiState.value.displayName,
+                        status = _uiState.value.status
+                    )
+                )
+            }
         }
     }
 }
