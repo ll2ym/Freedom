@@ -1,7 +1,7 @@
 import os
 import json
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 INVITE_STORE_PATH = "services/invite_codes.json"
 
@@ -22,13 +22,13 @@ def _save_invite_store(data: dict):
 def generate_invite_code(creator: str, valid_days: int = 30) -> str:
     """Create a new invite code with expiration and store it"""
     store = _load_invite_store()
-    raw_code = f"{creator}-{datetime.utcnow().isoformat()}-{os.urandom(4).hex()}"
+    raw_code = f"{creator}-{datetime.now(timezone.utc).isoformat()}-{os.urandom(4).hex()}"
     code = hashlib.sha256(raw_code.encode()).hexdigest()[:12]
 
     store[code] = {
         "creator": creator,
-        "created_at": datetime.utcnow().isoformat(),
-        "expires_at": (datetime.utcnow() + timedelta(days=valid_days)).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "expires_at": (datetime.now(timezone.utc) + timedelta(days=valid_days)).isoformat(),
         "used": False
     }
     _save_invite_store(store)
@@ -43,7 +43,7 @@ def validate_invite(code: str) -> bool:
         return False
     if invite["used"]:
         return False
-    if datetime.utcnow() > datetime.fromisoformat(invite["expires_at"]):
+    if datetime.now(timezone.utc) > datetime.fromisoformat(invite["expires_at"]):
         return False
     return True
 

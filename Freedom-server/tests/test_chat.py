@@ -5,9 +5,12 @@ from services import invite
 @pytest.fixture
 def authenticated_tokens(client):
     # Register and login two users
-    invite_code = invite.generate_invite_code("test-admin")
-    client.post("/auth/register", json={"username": "alice", "password": "password", "invite_code": invite_code})
-    client.post("/auth/register", json={"username": "bob", "password": "password", "invite_code": invite_code})
+    invite_code_alice = invite.generate_invite_code("test-admin")
+    client.post("/auth/register", json={"username": "alice", "password": "password", "invite_code": invite_code_alice})
+
+    invite_code_bob = invite.generate_invite_code("test-admin")
+    client.post("/auth/register", json={"username": "bob", "password": "password", "invite_code": invite_code_bob})
+
     alice_token = client.post("/auth/login", json={"username": "alice", "password": "password"}).json()["access_token"]
     bob_token = client.post("/auth/login", json={"username": "bob", "password": "password"}).json()["access_token"]
     return {"alice": alice_token, "bob": bob_token}
