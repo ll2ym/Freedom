@@ -6,6 +6,7 @@ from app.core.app import create_app
 from utils.db import Base, get_db
 import os
 import json
+import shutil
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 
@@ -15,20 +16,21 @@ engine = create_engine(
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 @pytest.fixture(scope="function")
-def db():
-    if not os.path.exists("services"):
-        os.makedirs("services")
-    with open("services/invite_codes.json", "w") as f:
-        json.dump({}, f)
+def db(tmp_path, monkeypatch):
+    # Create a temporary file for invite codes
+    invite_file = tmp_path / "invite_codes.json"
+    invite_file.write_text("{}")
+
+    # Monkeypatch the hardcoded path in the invite service
+    monkeypatch.setattr("services.invite.INVITE_STORE_PATH", str(invite_file))
+
     Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
+    db_session = TestingSessionLocal()
     try:
-        yield db
+        yield db_session
     finally:
-        db.close()
+        db_session.close()
         Base.metadata.drop_all(bind=engine)
-        os.remove("services/invite_codes.json")
-        os.rmdir("services")
 
 def override_get_db():
     db = TestingSessionLocal()

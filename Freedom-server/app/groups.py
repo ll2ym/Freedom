@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from typing import List
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timezone
 
 from utils.db import get_db
 from models.group import Group, GroupMember
@@ -32,7 +32,7 @@ def create_group(req: CreateGroupRequest, db: Session = Depends(get_db), current
     group = Group(
         name=req.name,
         owner_id=current_user.id,
-        created_at=datetime.utcnow()
+        created_at=datetime.now(timezone.utc)
     )
     db.add(group)
     db.commit()

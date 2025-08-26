@@ -3,9 +3,12 @@ from services import invite
 
 @pytest.fixture(scope="function")
 def setup_users(client):
-    invite_code = invite.generate_invite_code("admin")
-    client.post("/auth/register", json={"username": "alice", "password": "alicepass", "invite_code": invite_code})
-    client.post("/auth/register", json={"username": "bob", "password": "bobpass", "invite_code": invite_code})
+    invite_code_alice = invite.generate_invite_code("admin")
+    client.post("/auth/register", json={"username": "alice", "password": "alicepass", "invite_code": invite_code_alice})
+
+    invite_code_bob = invite.generate_invite_code("admin")
+    client.post("/auth/register", json={"username": "bob", "password": "bobpass", "invite_code": invite_code_bob})
+
     token1 = client.post("/auth/login", json={"username": "alice", "password": "alicepass"}).json()["access_token"]
     token2 = client.post("/auth/login", json={"username": "bob", "password": "bobpass"}).json()["access_token"]
     return {
